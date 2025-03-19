@@ -1,0 +1,82 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+*{
+    font-family: Outfit;
+}
+
+@layer base{
+    html{
+        scroll-behavior: smooth;
+    }
+}
+
+::-webkit-scrollbar{
+    display: none;
+}
+
+
+.job-description {
+    font-family: 'Arial', sans-serif;
+    line-height: 1.8;
+    color: #333;
+    padding: 20px;
+    
+    
+}
+
+/* Headings */
+.job-description h2 {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #2c3e50;
+    margin-bottom: 10px;
+}
+
+/* Paragraphs */
+.job-description p {
+    font-size: 1rem;
+    margin-bottom: 10px;
+    color: #444;
+}
+
+/* Ordered List */
+.job-description ol {
+    padding-left: 20px;
+    margin-bottom: 15px;
+}
+
+.job-description ol li {
+    margin-bottom: 8px;
+    font-size: 1rem;
+    color: #555;
+    position: relative;
+}
+
+/* Bullet Points */
+.job-description ol li::before {
+    content: "✔";
+    color: #3498db;
+    font-weight: bold;
+    margin-right: 10px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .job-description {
+        padding: 15px;
+    }
+
+    .job-description h2 {
+        font-size: 1.3rem;
+    }
+
+    .job-description p, 
+    .job-description ol li {
+        font-size: 0.95rem;
+    }
+}
+
