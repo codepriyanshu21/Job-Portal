@@ -1,6 +1,6 @@
 import React, { useContext, useEffect } from 'react'
 import { useState } from 'react';
-import { useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import { AppContext } from '../context/AppContext';
 import Loading from '../components/Loading';
 import Navbar from '../components/Navbar';
@@ -9,25 +9,85 @@ import kconvert from 'k-convert';
 import moment from 'moment'
 import JobCard from '../components/JobCard';
 import Footer from '../components/Footer';
+import axios from 'axios';
+import toast from 'react-hot-toast';
+import { useAuth } from '@clerk/clerk-react';
 
 const ApplyJob = () => {
   const { id } = useParams();
+  const navigate=useNavigate()
   const [jobsData, setJobData] = useState(null);
-  const { jobs } = useContext(AppContext);
+  const [isAlreadyApplied,setIsAlreadyApplied]=useState(false)
+  const { jobs,backendUrl,userData,userApplications,fetchUserApplications } = useContext(AppContext);
+  const {getToken}=useAuth()
 
   const fetchData = async () => {
-    const data = jobs.filter(job => job._id === id)
-    if (data.length !== 0) {
-      setJobData(data[0])
-      console.log(data[0])
+    try {
+      
+      const {data}=await axios.get(backendUrl+`/api/jobs/${id}`)
+
+      if(data.success){
+        setJobData(data.job)
+      }else{
+        toast.error('Error in applying job')
+      }
+
+    } catch (error) {
+      toast.error(error.message)
     }
   }
 
+  const checkAlreadyApplied=()=>{
+    const hasApplied=userApplications.some(item=>item.jobId._id===jobsData._id)
+    setIsAlreadyApplied(hasApplied)
+  }
+
   useEffect(() => {
-    if (jobs.length > 0) {
-      fetchData()
+    fetchData()
+  }, [id])
+
+  useEffect(()=>{
+    if(userApplications.length > 0 && jobsData){
+      checkAlreadyApplied()
     }
-  }, [id, jobs])
+  },[jobsData,userApplications,id])
+
+  const applyHandler=async()=>{
+    try {
+      
+      if(!userData){
+        return toast.error('Login to apply for jobs')
+      }
+
+      if(!userData.resume){
+        navigate('/applications')
+        return toast.error('Upload your resume to apply for jobs')
+      }
+
+      const token=await getToken()
+
+      const {data}=await axios.post(backendUrl+'/api/users/apply',
+        {jobId:jobsData._id},
+        {headers:{Authorization:`Bearer ${token}`}}
+      )
+      console.log(data)
+
+      if(data.success){
+        toast.success('Applied for the job')
+        fetchUserApplications()
+      }else{
+        toast.error('Error in applying job')
+      }
+
+    } catch (error) {
+      if (error.response?.status === 400 && error.response?.data?.message) {
+        toast.error(error.response.data.message);
+    } else {
+        toast.error("Internal error");
+    }
+    }
+  }
+
   return jobsData ? (
     <>
       <Navbar />
@@ -60,7 +120,7 @@ const ApplyJob = () => {
             </div>
             {/* Apply button */}
             <div className='flex flex-col justify-center text-end text-sm max-md:mx-auto max-md:text-center'>
-              <button className='bg-blue-600 hover:bg-blue-800 p-3 px-10 text-white rounded-xl'>Apply Now</button>
+              <button onClick={applyHandler} className='bg-blue-600 hover:bg-blue-800 p-3 px-10 text-white rounded-xl'>{isAlreadyApplied ? 'Already Applied' : 'Apply Now'}</button>
               <p className='mt-1 text-gray-600'>Posted {moment(jobsData.date).fromNow()}</p>
             </div>
           </div>
@@ -70,14 +130,19 @@ const ApplyJob = () => {
             <div className='w-full lg:w-2/3'>
               <h2 className='font-bold mb-4 text-3xl'>Job Description</h2>
               <div className='job-description' dangerouslySetInnerHTML={{__html:jobsData.description}}></div>
-              <button className='bg-blue-600 hover:bg-blue-800 p-3 mt-10 px-10 text-white rounded-xl'>Apply Now</button>
+              <button onClick={applyHandler} className='bg-blue-600 hover:bg-blue-800 p-3 mt-10 px-10 text-white rounded-xl'>{isAlreadyApplied ? 'Already Applied' : 'Apply Now'}</button>
             </div>
 
             {/* Right side more jobs */}
             <div className='w-full lg:w-1/3 mt-8 lg:mt-0 lg:ml-8 space-y-5'>
               <h2>More jobs from {jobsData.companyId.name}</h2>
               {jobs.filter(job=>job._id !==jobsData._id && job.companyId._id===jobsData.companyId._id)
-              .filter(job=>true).slice(0,4)
+              .filter(job=>{
+                //set of applied jobs
+                const appliedJobsIds=new Set(userApplications.map(app=>app.jobId && app.jobId._id))
+                //Return true if the user has not already applied for this job
+                return !appliedJobsIds.has(job._id)
+              }).slice(0,4)
               .map((job,index)=><JobCard key={index} job={job}/>)}
             </div>
           </div>
