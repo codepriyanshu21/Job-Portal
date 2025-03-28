@@ -106,6 +106,7 @@ export const AppContextProvider = (props) => {
       const {data}=await axios.get(backendUrl+'/api/users/applications',
         {headers:{Authorization:`Bearer ${token}`}}
       )
+      
       if(data.success){
         setUserApplications(data.applications)
       }else{
