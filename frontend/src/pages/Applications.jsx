@@ -78,11 +78,11 @@ const Applications = () => {
         {/* Jobs Applied Section */}
         <h2 className='text-2xl font-bold text-gray-800 mb-4'>Jobs Applied</h2>
         <div className='overflow-x-auto rounded-lg shadow-md'>
-          <table className='w-full bg-white border rounded-lg min-w-[600px]'>
+          <table className='w-full bg-white border rounded-lg table-auto'>
             <thead className='bg-gray-100'>
               <tr>
                 <th className='py-3 px-4 border-b text-left'>Company</th>
-                <th className='py-3 px-4 border-b text-left'>Job Title</th>
+                <th className='py-3 px-4 border-b text-left hidden md:table-cell'>Job Title</th>
                 <th className='py-3 px-4 border-b text-left hidden md:table-cell'>Location</th>
                 <th className='py-3 px-4 border-b text-left hidden md:table-cell'>Date</th>
                 <th className='py-3 px-4 border-b text-left'>Status</th>
@@ -95,7 +95,7 @@ const Applications = () => {
                     <img className='w-8 h-8 rounded-full' src={job.companyId.image} alt={job.company} />
                     <span className='font-medium'>{job.companyId.name}</span>
                   </td>
-                  <td className='py-3 px-4 border-b'>{job.jobId.title}</td>
+                  <td className='py-3 px-4 border-b hidden md:table-cell'>{job.jobId.title}</td>
                   <td className='py-3 px-4 border-b hidden md:table-cell'>{job.jobId.location}</td>
                   <td className='py-3 px-4 border-b hidden md:table-cell'>{moment(job.date).format('ll')}</td>
                   <td className='py-3 px-4 border-b'>
