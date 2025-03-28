@@ -64,7 +64,7 @@ const Applications = () => {
 
         {/* Prevent crash when userData is null */}
         {!userData ? (
-          <div className="flex items-center justify-center min-h-screen"><Loading/></div>
+          <div className="flex items-center justify-center max-sm:-mt-[25%] -mt-[10%]"><Loading/></div>
         ) : (
           <div className="flex flex-wrap gap-3 items-center mb-6">
             {isEdit || userData?.resume === "" ? (
